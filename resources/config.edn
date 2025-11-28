@@ -1,0 +1,2 @@
+{:fhirbox/db {:jdbc-url "jdbc:postgresql://localhost:5433/fhirbox?user=fhirbox&password=fhirbox"}
+ :fhirbox/server {:port 3001}}
