@@ -16,6 +16,7 @@
    :rest [{:mode "server"
            :resource [{:type "Patient" :interaction [{:code "read"} {:code "create"}]}]}]})
 
+<<<<<<< HEAD
  (def routes
    [["/" {:get {:handler (fn [_] {:status 200
                                   :headers {"Content-Type" "text/plain"}
@@ -26,11 +27,32 @@
     ["/:resourceType" {:post {:handler (fn [request]
                                          (let [resource-type (get-in request [:path-params :resourceType])
                                                resource (:body-params request)]
-                                           (resource/create-resource! (:db request) resource-type resource)))}}]
+                                           (resource/create-resource! (:db request) resource-type resource)))}
+                       :get {:handler (fn [request]
+                                        (let [resource-type (get-in request [:path-params :resourceType])
+                                              query-params (:query-params request)]
+                                          (resource/search-resources (:db request) resource-type query-params)))}}]
     ["/:resourceType/:id" {:get {:handler (fn [request]
                                             (let [resource-type (get-in request [:path-params :resourceType])
                                                   id (get-in request [:path-params :id])]
                                               (resource/get-resource-by-id (:db request) resource-type id)))}}]])
+=======
+(def routes
+  [["/" {:get {:handler (fn [_] {:status 200
+                                 :headers {"Content-Type" "text/plain"}
+                                 :body "FHIR server is running"})}}]
+   ["/metadata" {:get {:handler (fn [_] {:status 200
+                                         :headers {"Content-Type" "application/fhir+json"}
+                                         :body capability-statement})}}]
+    ["/:resourceType" {:post {:handler (fn [request]
+                                         (let [resource-type (get-in request [:path-params :resourceType])
+                                               resource (:body-params request)]
+                                           (resource/create-resource! (:db request) resource-type resource)))}
+                       :get {:handler (fn [request]
+                                        (let [resource-type (get-in request [:path-params :resourceType])
+                                              query-params (:query-params request)]
+                                          (resource/search-resources (:db request) resource-type query-params)))}}]])
+>>>>>>> step-17
 
 (defn app [db request]
   (let [handler (-> (ring/ring-handler (ring/router routes {:conflicts nil}))
