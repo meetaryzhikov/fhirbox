@@ -10,7 +10,8 @@
     cheshire/cheshire {:mvn/version "5.13.0"}
     metosin/malli {:mvn/version "0.16.0"}
     ring/ring-core {:mvn/version "1.12.2"}
-    ring/ring-json {:mvn/version "0.5.1"}}
+     ring/ring-json {:mvn/version "0.5.1"}
+     ring-cors/ring-cors {:mvn/version "0.1.13"}}
 
   :aliases
   {:repl/cider {:extra-deps {cider/cider-nrepl {:mvn/version "0.28.5"}}

@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [reitit.ring :as ring]
             [ring.middleware.json :as middleware]
+            [ring.middleware.cors :as cors]
             [fhirbox.resource :as resource]))
 
 (def capability-statement
@@ -30,5 +31,8 @@
 (defn app [db request]
   (let [handler (-> (ring/ring-handler (ring/router routes {:conflicts nil}))
                     (middleware/wrap-json-body {:keywords? false})
-                    (middleware/wrap-json-response))]
+                    (middleware/wrap-json-response)
+                    (cors/wrap-cors :access-control-allow-origin [#".*"]
+                                    :access-control-allow-methods [:get :post :put :delete :options]
+                                    :access-control-allow-headers ["Content-Type" "Authorization"]))]
     (handler (assoc request :db db))))
