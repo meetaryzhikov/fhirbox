@@ -16,17 +16,21 @@
    :rest [{:mode "server"
            :resource [{:type "Patient" :interaction [{:code "read"} {:code "create"}]}]}]})
 
-(def routes
-  [["/" {:get {:handler (fn [_] {:status 200
-                                 :headers {"Content-Type" "text/plain"}
-                                 :body "FHIR server is running"})}}]
-   ["/metadata" {:get {:handler (fn [_] {:status 200
-                                         :headers {"Content-Type" "application/fhir+json"}
-                                         :body capability-statement})}}]
-   ["/:resourceType" {:post {:handler (fn [request]
-                                        (let [resource-type (get-in request [:path-params :resourceType])
-                                              resource (:body-params request)]
-                                          (resource/create-resource! (:db request) resource-type resource)))}}]])
+ (def routes
+   [["/" {:get {:handler (fn [_] {:status 200
+                                  :headers {"Content-Type" "text/plain"}
+                                  :body "FHIR server is running"})}}]
+    ["/metadata" {:get {:handler (fn [_] {:status 200
+                                          :headers {"Content-Type" "application/fhir+json"}
+                                          :body capability-statement})}}]
+    ["/:resourceType" {:post {:handler (fn [request]
+                                         (let [resource-type (get-in request [:path-params :resourceType])
+                                               resource (:body-params request)]
+                                           (resource/create-resource! (:db request) resource-type resource)))}}]
+    ["/:resourceType/:id" {:get {:handler (fn [request]
+                                            (let [resource-type (get-in request [:path-params :resourceType])
+                                                  id (get-in request [:path-params :id])]
+                                              (resource/get-resource-by-id (:db request) resource-type id)))}}]])
 
 (defn app [db request]
   (let [handler (-> (ring/ring-handler (ring/router routes {:conflicts nil}))
