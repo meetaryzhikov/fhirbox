@@ -23,10 +23,14 @@
    ["/metadata" {:get {:handler (fn [_] {:status 200
                                          :headers {"Content-Type" "application/fhir+json"}
                                          :body capability-statement})}}]
-   ["/:resourceType" {:post {:handler (fn [request]
+    ["/:resourceType" {:post {:handler (fn [request]
+                                         (let [resource-type (get-in request [:path-params :resourceType])
+                                               resource (:body-params request)]
+                                           (resource/create-resource! (:db request) resource-type resource)))}
+                       :get {:handler (fn [request]
                                         (let [resource-type (get-in request [:path-params :resourceType])
-                                              resource (:body-params request)]
-                                          (resource/create-resource! (:db request) resource-type resource)))}}]])
+                                              query-params (:query-params request)]
+                                          (resource/search-resources (:db request) resource-type query-params)))}}]])
 
 (defn app [db request]
   (let [handler (-> (ring/ring-handler (ring/router routes {:conflicts nil}))
