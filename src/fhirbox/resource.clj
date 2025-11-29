@@ -13,3 +13,12 @@
     {:status 201
      :headers {"Location" (str "/" resource-type "/" logical-id)}
      :body updated-resource}))
+
+(defn get-resource-by-id [ds resource-type id]
+  (let [result (jdbc/execute-one! ds ["SELECT data FROM resource WHERE resource_type = ? AND (data->>'id') = ? AND status = 'active'" resource-type id])]
+    (if result
+      {:status 200 :body (json/parse-string (:resource/data result) true)}
+      {:status 404 :body {"resourceType" "OperationOutcome"
+                          "issue" [{"severity" "error"
+                                    "code" "not-found"
+                                    "diagnostics" "Resource not found"}]}})))
