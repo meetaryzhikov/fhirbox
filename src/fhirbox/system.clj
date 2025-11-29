@@ -14,13 +14,14 @@
   ;; HikariCP will close automatically, but if needed
   )
 
-(defmethod ig/init-key :fhirbox/server [_ {:keys [port] :as opts}]
+(defmethod ig/init-key :fhirbox/server [_ {:keys [port db] :as opts}]
   (println "Starting server on port" port)
-  (let [handler handler/app]
+  (let [handler (partial handler/app db)]
     (jetty/run-jetty handler {:port port :join? false})))
 
 (defmethod ig/halt-key! :fhirbox/server [_ server]
   (.stop server))
 
 (def config
-  (ig/read-string (slurp "resources/config.edn")))
+  {:fhirbox/db {:jdbc-url "jdbc:postgresql://localhost:5433/fhirbox?user=fhirbox&password=fhirbox"}
+   :fhirbox/server {:port 3001 :db (ig/ref :fhirbox/db)}})
