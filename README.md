@@ -50,10 +50,40 @@ Returns a simple health check message.
 
 Returns the FHIR CapabilityStatement in JSON format.
 
+### POST /:resourceType
+
+Creates a new FHIR resource of the specified type.
+
+**Example:**
+```bash
+curl -X POST http://127.0.0.1:3001/Patient \
+  -H "Content-Type: application/json" \
+  -d '{"resourceType": "Patient", "name": [{"family": "Doe", "given": ["John"]}]}'
+```
+
+### GET /:resourceType
+
+Searches for resources of the specified type.
+
+**Example:**
+```bash
+curl http://127.0.0.1:3001/Patient
+```
+
+### GET /:resourceType/:id
+
+Retrieves a specific resource by ID.
+
+**Example:**
+```bash
+curl http://127.0.0.1:3001/Patient/123
+```
+
 ## Development
 
 - Start REPL: `clojure -M:repl/cider`
 - Run tests: `clojure -M:test`
+- Run linter: `clojure -M:cljfmt check` (if configured)
 
 ## Database
 

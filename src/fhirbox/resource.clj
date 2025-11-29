@@ -14,6 +14,13 @@
      :headers {"Location" (str "/" resource-type "/" logical-id)}
      :body updated-resource}))
 
+(defn search-resources [ds resource-type query-params]
+  (let [query (str "SELECT data FROM resource WHERE resource_type = ? AND status = 'active'")
+        results (jdbc/execute! ds (into [query] [resource-type]))]
+    {:status 200 :body {:resourceType "Bundle"
+                        :type "searchset"
+                        :entry (map #(hash-map :resource (json/parse-string (:resource/data %) true)) results)}}))
+
 (defn get-resource-by-id [ds resource-type id]
   (let [result (jdbc/execute-one! ds ["SELECT data FROM resource WHERE resource_type = ? AND (data->>'id') = ? AND status = 'active'" resource-type id])]
     (if result
