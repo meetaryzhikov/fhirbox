@@ -1,5 +1,8 @@
 (ns fhirbox.handler
-  (:require [cheshire.core :as json]))
+  (:require [cheshire.core :as json]
+            [reitit.ring :as ring]
+            [ring.middleware.json :as middleware]
+            [fhirbox.resource :as resource]))
 
 (def capability-statement
   {:resourceType "CapabilityStatement"
@@ -12,12 +15,20 @@
    :rest [{:mode "server"
            :resource [{:type "Patient" :interaction [{:code "read"} {:code "create"}]}]}]})
 
-(defn app [request]
-  (case (:uri request)
-    "/" {:status 200
-         :headers {"Content-Type" "text/plain"}
-         :body "FHIR server is running"}
-    "/metadata" {:status 200
-                 :headers {"Content-Type" "application/fhir+json"}
-                 :body (json/generate-string capability-statement)}
-    {:status 404 :body "Not found"}))
+(def routes
+  [["/" {:get {:handler (fn [_] {:status 200
+                                 :headers {"Content-Type" "text/plain"}
+                                 :body "FHIR server is running"})}}]
+   ["/metadata" {:get {:handler (fn [_] {:status 200
+                                         :headers {"Content-Type" "application/fhir+json"}
+                                         :body capability-statement})}}]
+   ["/:resourceType" {:post {:handler (fn [request]
+                                        (let [resource-type (get-in request [:path-params :resourceType])
+                                              resource (:body-params request)]
+                                          (resource/create-resource! (:db request) resource-type resource)))}}]])
+
+(defn app [db request]
+  (let [handler (-> (ring/ring-handler (ring/router routes {:conflicts nil}))
+                    (middleware/wrap-json-body {:keywords? false})
+                    (middleware/wrap-json-response))]
+    (handler (assoc request :db db))))
